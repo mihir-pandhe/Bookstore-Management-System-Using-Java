@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -9,12 +10,14 @@ class Book {
     private String author;
     private String genre;
     private double price;
+    private int quantity;
 
-    public Book(String title, String author, String genre, double price) {
+    public Book(String title, String author, String genre, double price, int quantity) {
         this.title = title;
         this.author = author;
         this.genre = genre;
         this.price = price;
+        this.quantity = quantity;
     }
 
     public String getTitle() {
@@ -49,15 +52,44 @@ class Book {
         this.price = price;
     }
 
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
     @Override
     public String toString() {
-        return "Title: " + title + ", Author: " + author + ", Genre: " + genre + ", Price: $" + price;
+        return "Title: " + title + ", Author: " + author + ", Genre: " + genre + ", Price: $" + price + ", Quantity: "
+                + quantity;
+    }
+}
+
+class Transaction {
+    private String bookTitle;
+    private int quantity;
+    private double totalPrice;
+    private Date date;
+
+    public Transaction(String bookTitle, int quantity, double totalPrice) {
+        this.bookTitle = bookTitle;
+        this.quantity = quantity;
+        this.totalPrice = totalPrice;
+        this.date = new Date();
+    }
+
+    @Override
+    public String toString() {
+        return "Book: " + bookTitle + ", Quantity: " + quantity + ", Total Price: $" + totalPrice + ", Date: " + date;
     }
 }
 
 public class BookstoreManagementSystem {
     private static Scanner scanner = new Scanner(System.in);
     private static List<Book> books = new ArrayList<>();
+    private static List<Transaction> transactions = new ArrayList<>();
 
     public static void main(String[] args) {
         while (true) {
@@ -67,7 +99,9 @@ public class BookstoreManagementSystem {
             System.out.println("3. Search Books");
             System.out.println("4. Update Book");
             System.out.println("5. Delete Book");
-            System.out.println("6. Exit");
+            System.out.println("6. Sell Book");
+            System.out.println("7. View Transaction History");
+            System.out.println("8. Exit");
             System.out.print("Select an option: ");
 
             int choice = scanner.nextInt();
@@ -90,6 +124,12 @@ public class BookstoreManagementSystem {
                     deleteBook();
                     break;
                 case 6:
+                    sellBook();
+                    break;
+                case 7:
+                    viewTransactionHistory();
+                    break;
+                case 8:
                     System.out.println("Exiting the system.");
                     System.exit(0);
                     break;
@@ -111,9 +151,12 @@ public class BookstoreManagementSystem {
 
         System.out.print("Enter Book Price: ");
         double price = scanner.nextDouble();
+
+        System.out.print("Enter Quantity: ");
+        int quantity = scanner.nextInt();
         scanner.nextLine();
 
-        Book newBook = new Book(title, author, genre, price);
+        Book newBook = new Book(title, author, genre, price, quantity);
         books.add(newBook);
 
         System.out.println("Book added successfully.\n");
@@ -287,6 +330,13 @@ public class BookstoreManagementSystem {
             bookToUpdate.setPrice(newPrice);
         }
 
+        System.out.print("Enter new Quantity (enter -1 to keep current): ");
+        int newQuantity = scanner.nextInt();
+        scanner.nextLine();
+        if (newQuantity != -1) {
+            bookToUpdate.setQuantity(newQuantity);
+        }
+
         System.out.println("Book updated successfully.\n");
     }
 
@@ -301,5 +351,50 @@ public class BookstoreManagementSystem {
         } else {
             System.out.println("Book not found.\n");
         }
+    }
+
+    private static void sellBook() {
+        System.out.print("Enter the title of the book to sell: ");
+        String title = scanner.nextLine();
+
+        Book bookToSell = books.stream()
+                .filter(book -> book.getTitle().equalsIgnoreCase(title))
+                .findFirst()
+                .orElse(null);
+
+        if (bookToSell == null) {
+            System.out.println("Book not found.\n");
+            return;
+        }
+
+        System.out.print("Enter quantity to sell: ");
+        int quantityToSell = scanner.nextInt();
+        scanner.nextLine();
+
+        if (quantityToSell > bookToSell.getQuantity()) {
+            System.out.println("Not enough stock available.\n");
+            return;
+        }
+
+        bookToSell.setQuantity(bookToSell.getQuantity() - quantityToSell);
+        double totalPrice = quantityToSell * bookToSell.getPrice();
+
+        Transaction transaction = new Transaction(bookToSell.getTitle(), quantityToSell, totalPrice);
+        transactions.add(transaction);
+
+        System.out.println("Book sold successfully. Total Price: $" + totalPrice + "\n");
+    }
+
+    private static void viewTransactionHistory() {
+        if (transactions.isEmpty()) {
+            System.out.println("No transactions available.\n");
+            return;
+        }
+
+        System.out.println("Transaction History:");
+        for (Transaction transaction : transactions) {
+            System.out.println(transaction);
+        }
+        System.out.println();
     }
 }
