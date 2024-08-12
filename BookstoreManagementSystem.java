@@ -66,7 +66,8 @@ public class BookstoreManagementSystem {
             System.out.println("2. View Books");
             System.out.println("3. Search Books");
             System.out.println("4. Update Book");
-            System.out.println("5. Exit");
+            System.out.println("5. Delete Book");
+            System.out.println("6. Exit");
             System.out.print("Select an option: ");
 
             int choice = scanner.nextInt();
@@ -86,6 +87,9 @@ public class BookstoreManagementSystem {
                     updateBook();
                     break;
                 case 5:
+                    deleteBook();
+                    break;
+                case 6:
                     System.out.println("Exiting the system.");
                     System.exit(0);
                     break;
@@ -284,5 +288,18 @@ public class BookstoreManagementSystem {
         }
 
         System.out.println("Book updated successfully.\n");
+    }
+
+    private static void deleteBook() {
+        System.out.print("Enter the title of the book to delete: ");
+        String title = scanner.nextLine();
+
+        boolean removed = books.removeIf(book -> book.getTitle().equalsIgnoreCase(title));
+
+        if (removed) {
+            System.out.println("Book deleted successfully.\n");
+        } else {
+            System.out.println("Book not found.\n");
+        }
     }
 }
