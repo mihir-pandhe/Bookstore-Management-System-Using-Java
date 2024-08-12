@@ -71,18 +71,21 @@ class Transaction {
     private String bookTitle;
     private int quantity;
     private double totalPrice;
+    private String paymentMethod;
     private Date date;
 
-    public Transaction(String bookTitle, int quantity, double totalPrice) {
+    public Transaction(String bookTitle, int quantity, double totalPrice, String paymentMethod) {
         this.bookTitle = bookTitle;
         this.quantity = quantity;
         this.totalPrice = totalPrice;
+        this.paymentMethod = paymentMethod;
         this.date = new Date();
     }
 
     @Override
     public String toString() {
-        return "Book: " + bookTitle + ", Quantity: " + quantity + ", Total Price: $" + totalPrice + ", Date: " + date;
+        return "Book: " + bookTitle + ", Quantity: " + quantity + ", Total Price: $" + totalPrice + ", Payment Method: "
+                + paymentMethod + ", Date: " + date;
     }
 }
 
@@ -379,7 +382,10 @@ public class BookstoreManagementSystem {
         bookToSell.setQuantity(bookToSell.getQuantity() - quantityToSell);
         double totalPrice = quantityToSell * bookToSell.getPrice();
 
-        Transaction transaction = new Transaction(bookToSell.getTitle(), quantityToSell, totalPrice);
+        System.out.print("Enter payment method (Cash, Credit, Debit): ");
+        String paymentMethod = scanner.nextLine();
+
+        Transaction transaction = new Transaction(bookToSell.getTitle(), quantityToSell, totalPrice, paymentMethod);
         transactions.add(transaction);
 
         System.out.println("Book sold successfully. Total Price: $" + totalPrice + "\n");
