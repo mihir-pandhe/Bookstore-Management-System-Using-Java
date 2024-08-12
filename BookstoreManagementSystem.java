@@ -59,7 +59,6 @@ class Book {
     @Override
     public String toString() {
         return String.format("Title: %s, Author: %s, Genre: %s, Price: $%.2f, Quantity: %d", title, author, genre,
-               
                 price, quantity);
     }
 }
@@ -81,7 +80,6 @@ class Transaction {
 
     @Override
     public String toString() {
-               
         return String.format("Book: %s, Quantity: %d, Total Price: $%.2f, Payment Method: %s, Date: %s", bookTitle,
                 quantity, totalPrice, paymentMethod, date);
     }
@@ -248,19 +246,47 @@ public class BookstoreManagementSystem {
         updateField(bookToUpdate::setTitle, "Enter new Title (leave blank to keep current): ");
         updateField(bookToUpdate::setAuthor, "Enter new Author (leave blank to keep current): ");
         updateField(bookToUpdate::setGenre, "Enter new Genre (leave blank to keep current): ");
-        updateField(bookToUpdate::setPrice, "Enter new Price (enter -1 to keep current): ");
-        updateField(bookToUpdate::setQuantity, "Enter new Quantity (enter -1 to keep current): ");
+        updatePrice(bookToUpdate::setPrice, "Enter new Price (enter -1 to keep current): ");
+        updateQuantity(bookToUpdate::setQuantity, "Enter new Quantity (enter -1 to keep current): ");
 
         System.out.println("Book updated successfully.\n");
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> void updateField(java.util.function.Consumer<T> setter, String prompt) {
+    private static void updateField(java.util.function.Consumer<String> setter, String prompt) {
         System.out.print(prompt);
         String input = scanner.nextLine();
         if (!input.isBlank()) {
-            T value = (T) (input.matches("-?\\d+(\\.\\d+)?") ? Double.parseDouble(input) : input);
-            setter.accept(value);
+            setter.accept(input);
+        }
+    }
+
+    private static void updatePrice(java.util.function.Consumer<Double> setter, String prompt) {
+        System.out.print(prompt);
+        String input = scanner.nextLine();
+        if (!input.isBlank()) {
+            try {
+                double price = Double.parseDouble(input);
+                if (price >= 0) {
+                    setter.accept(price);
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid price. Keeping current price.");
+            }
+        }
+    }
+
+    private static void updateQuantity(java.util.function.Consumer<Integer> setter, String prompt) {
+        System.out.print(prompt);
+        String input = scanner.nextLine();
+        if (!input.isBlank()) {
+            try {
+                int quantity = Integer.parseInt(input);
+                if (quantity >= 0) {
+                    setter.accept(quantity);
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid quantity. Keeping current quantity.");
+            }
         }
     }
 
@@ -281,41 +307,42 @@ public class BookstoreManagementSystem {
         System.out.print("Enter the title of the book to sell: ");
         String title = scanner.nextLine();
 
-        Book bookToSell = books.stream()
+        Optional<Book> bookToSellOpt = books.stream()
                 .filter(book -> book.getTitle().equalsIgnoreCase(title))
-                .findFirst()
-                .orElse(null);
+                .findFirst();
 
-        if (bookToSell == null) {
+        if (bookToSellOpt.isEmpty()) {
             System.out.println("Book not found.\n");
             return;
         }
+
+        Book bookToSell = bookToSellOpt.get();
 
         System.out.print("Enter quantity to sell: ");
         int quantityToSell = scanner.nextInt();
         scanner.nextLine();
 
         if (quantityToSell > bookToSell.getQuantity()) {
-            System.out.println("Not enough stock available.\n");
+            System.out.println("Not enough stock.\n");
             return;
         }
 
         bookToSell.setQuantity(bookToSell.getQuantity() - quantityToSell);
+
         double totalPrice = quantityToSell * bookToSell.getPrice();
 
-        System.out.print("Enter payment method (Cash, Credit, Debit): ");
+        System.out.print("Enter payment method: ");
         String paymentMethod = scanner.nextLine();
 
-        transactions.add(new Transaction(bookToSell.getTitle(), quantityToSell, totalPrice, paymentMethod));
+        transactions.add(new Transaction(title, quantityToSell, totalPrice, paymentMethod));
 
-        System.out.println("Book sold successfully. Total Price: $" + totalPrice + "\n");
+        System.out.println("Book sold successfully. Total price: $" + totalPrice + "\n");
     }
 
     private static void viewTransactionHistory() {
         if (transactions.isEmpty()) {
-            System.out.println("No transactions available.\n");
+            System.out.println("No transactions found.\n");
         } else {
-            System.out.println("Transaction History:");
             transactions.forEach(System.out::println);
             System.out.println();
         }
