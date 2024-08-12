@@ -99,6 +99,8 @@ public class BookstoreManagementSystem {
         System.out.println("Sort by:");
         System.out.println("1. Title");
         System.out.println("2. Author");
+        System.out.println("3. Genre");
+        System.out.println("4. Price");
         System.out.print("Select an option: ");
 
         int sortOption = scanner.nextInt();
@@ -110,6 +112,12 @@ public class BookstoreManagementSystem {
                 break;
             case 2:
                 books.sort(Comparator.comparing(Book::getAuthor));
+                break;
+            case 3:
+                books.sort(Comparator.comparing(Book::getGenre));
+                break;
+            case 4:
+                books.sort(Comparator.comparingDouble(Book::getPrice));
                 break;
             default:
                 System.out.println("Invalid option.\n");
