@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -92,12 +93,33 @@ public class BookstoreManagementSystem {
     private static void viewBooks() {
         if (books.isEmpty()) {
             System.out.println("No books available.\n");
-        } else {
-            System.out.println("Book List:");
-            for (Book book : books) {
-                System.out.println(book);
-            }
-            System.out.println();
+            return;
         }
+
+        System.out.println("Sort by:");
+        System.out.println("1. Title");
+        System.out.println("2. Author");
+        System.out.print("Select an option: ");
+
+        int sortOption = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (sortOption) {
+            case 1:
+                books.sort(Comparator.comparing(Book::getTitle));
+                break;
+            case 2:
+                books.sort(Comparator.comparing(Book::getAuthor));
+                break;
+            default:
+                System.out.println("Invalid option.\n");
+                break;
+        }
+
+        System.out.println("Book List:");
+        for (Book book : books) {
+            System.out.println(book);
+        }
+        System.out.println();
     }
 }
