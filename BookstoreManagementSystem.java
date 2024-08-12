@@ -1,8 +1,4 @@
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 class Book {
@@ -62,8 +58,9 @@ class Book {
 
     @Override
     public String toString() {
-        return "Title: " + title + ", Author: " + author + ", Genre: " + genre + ", Price: $" + price + ", Quantity: "
-                + quantity;
+        return String.format("Title: %s, Author: %s, Genre: %s, Price: $%.2f, Quantity: %d", title, author, genre,
+               
+                price, quantity);
     }
 }
 
@@ -84,15 +81,16 @@ class Transaction {
 
     @Override
     public String toString() {
-        return "Book: " + bookTitle + ", Quantity: " + quantity + ", Total Price: $" + totalPrice + ", Payment Method: "
-                + paymentMethod + ", Date: " + date;
+               
+        return String.format("Book: %s, Quantity: %d, Total Price: $%.2f, Payment Method: %s, Date: %s", bookTitle,
+                quantity, totalPrice, paymentMethod, date);
     }
 }
 
 public class BookstoreManagementSystem {
-    private static Scanner scanner = new Scanner(System.in);
-    private static List<Book> books = new ArrayList<>();
-    private static List<Transaction> transactions = new ArrayList<>();
+    private static final Scanner scanner = new Scanner(System.in);
+    private static final List<Book> books = new ArrayList<>();
+    private static final List<Transaction> transactions = new ArrayList<>();
 
     public static void main(String[] args) {
         while (true) {
@@ -111,33 +109,18 @@ public class BookstoreManagementSystem {
             scanner.nextLine();
 
             switch (choice) {
-                case 1:
-                    addBook();
-                    break;
-                case 2:
-                    viewBooks();
-                    break;
-                case 3:
-                    searchBooks();
-                    break;
-                case 4:
-                    updateBook();
-                    break;
-                case 5:
-                    deleteBook();
-                    break;
-                case 6:
-                    sellBook();
-                    break;
-                case 7:
-                    viewTransactionHistory();
-                    break;
-                case 8:
+                case 1 -> addBook();
+                case 2 -> viewBooks();
+                case 3 -> searchBooks();
+                case 4 -> updateBook();
+                case 5 -> deleteBook();
+                case 6 -> sellBook();
+                case 7 -> viewTransactionHistory();
+                case 8 -> {
                     System.out.println("Exiting the system.");
                     System.exit(0);
-                    break;
-                default:
-                    System.out.println("Invalid option. Please try again.");
+                }
+                default -> System.out.println("Invalid option. Please try again.");
             }
         }
     }
@@ -145,23 +128,17 @@ public class BookstoreManagementSystem {
     private static void addBook() {
         System.out.print("Enter Book Title: ");
         String title = scanner.nextLine();
-
         System.out.print("Enter Book Author: ");
         String author = scanner.nextLine();
-
         System.out.print("Enter Book Genre: ");
         String genre = scanner.nextLine();
-
         System.out.print("Enter Book Price: ");
         double price = scanner.nextDouble();
-
         System.out.print("Enter Quantity: ");
         int quantity = scanner.nextInt();
         scanner.nextLine();
 
-        Book newBook = new Book(title, author, genre, price, quantity);
-        books.add(newBook);
-
+        books.add(new Book(title, author, genre, price, quantity));
         System.out.println("Book added successfully.\n");
     }
 
@@ -181,28 +158,21 @@ public class BookstoreManagementSystem {
         int sortOption = scanner.nextInt();
         scanner.nextLine();
 
-        switch (sortOption) {
-            case 1:
-                books.sort(Comparator.comparing(Book::getTitle));
-                break;
-            case 2:
-                books.sort(Comparator.comparing(Book::getAuthor));
-                break;
-            case 3:
-                books.sort(Comparator.comparing(Book::getGenre));
-                break;
-            case 4:
-                books.sort(Comparator.comparingDouble(Book::getPrice));
-                break;
-            default:
-                System.out.println("Invalid option. Displaying unsorted list.\n");
-                break;
+        Comparator<Book> comparator = switch (sortOption) {
+            case 1 -> Comparator.comparing(Book::getTitle);
+            case 2 -> Comparator.comparing(Book::getAuthor);
+            case 3 -> Comparator.comparing(Book::getGenre);
+            case 4 -> Comparator.comparingDouble(Book::getPrice);
+            default -> null;
+        };
+
+        if (comparator != null) {
+            books.sort(comparator);
+        } else {
+            System.out.println("Invalid option. Displaying unsorted list.\n");
         }
 
-        System.out.println("Book List:");
-        for (Book book : books) {
-            System.out.println(book);
-        }
+        books.forEach(System.out::println);
         System.out.println();
     }
 
@@ -218,51 +188,20 @@ public class BookstoreManagementSystem {
         scanner.nextLine();
 
         switch (searchOption) {
-            case 1:
-                searchByTitle();
-                break;
-            case 2:
-                searchByAuthor();
-                break;
-            case 3:
-                searchByGenre();
-                break;
-            case 4:
-                searchByPriceRange();
-                break;
-            default:
-                System.out.println("Invalid option. Please try again.");
+            case 1 -> searchByField(Book::getTitle, "Enter Book Title: ");
+            case 2 -> searchByField(Book::getAuthor, "Enter Book Author: ");
+            case 3 -> searchByField(Book::getGenre, "Enter Book Genre: ");
+            case 4 -> searchByPriceRange();
+            default -> System.out.println("Invalid option. Please try again.");
         }
     }
 
-    private static void searchByTitle() {
-        System.out.print("Enter Book Title: ");
-        String title = scanner.nextLine();
+    private static void searchByField(java.util.function.Function<Book, String> fieldGetter, String prompt) {
+        System.out.print(prompt);
+        String value = scanner.nextLine();
 
         List<Book> result = books.stream()
-                .filter(book -> book.getTitle().equalsIgnoreCase(title))
-                .collect(Collectors.toList());
-
-        displaySearchResults(result);
-    }
-
-    private static void searchByAuthor() {
-        System.out.print("Enter Book Author: ");
-        String author = scanner.nextLine();
-
-        List<Book> result = books.stream()
-                .filter(book -> book.getAuthor().equalsIgnoreCase(author))
-                .collect(Collectors.toList());
-
-        displaySearchResults(result);
-    }
-
-    private static void searchByGenre() {
-        System.out.print("Enter Book Genre: ");
-        String genre = scanner.nextLine();
-
-        List<Book> result = books.stream()
-                .filter(book -> book.getGenre().equalsIgnoreCase(genre))
+                .filter(book -> fieldGetter.apply(book).equalsIgnoreCase(value))
                 .collect(Collectors.toList());
 
         displaySearchResults(result);
@@ -286,10 +225,7 @@ public class BookstoreManagementSystem {
         if (result.isEmpty()) {
             System.out.println("No books found.\n");
         } else {
-            System.out.println("Search Results:");
-            for (Book book : result) {
-                System.out.println(book);
-            }
+            result.forEach(System.out::println);
             System.out.println();
         }
     }
@@ -298,49 +234,34 @@ public class BookstoreManagementSystem {
         System.out.print("Enter the title of the book to update: ");
         String title = scanner.nextLine();
 
-        Book bookToUpdate = books.stream()
+        Optional<Book> bookToUpdateOpt = books.stream()
                 .filter(book -> book.getTitle().equalsIgnoreCase(title))
-                .findFirst()
-                .orElse(null);
+                .findFirst();
 
-        if (bookToUpdate == null) {
+        if (bookToUpdateOpt.isEmpty()) {
             System.out.println("Book not found.\n");
             return;
         }
 
-        System.out.print("Enter new Title (leave blank to keep current): ");
-        String newTitle = scanner.nextLine();
-        if (!newTitle.isEmpty()) {
-            bookToUpdate.setTitle(newTitle);
-        }
+        Book bookToUpdate = bookToUpdateOpt.get();
 
-        System.out.print("Enter new Author (leave blank to keep current): ");
-        String newAuthor = scanner.nextLine();
-        if (!newAuthor.isEmpty()) {
-            bookToUpdate.setAuthor(newAuthor);
-        }
-
-        System.out.print("Enter new Genre (leave blank to keep current): ");
-        String newGenre = scanner.nextLine();
-        if (!newGenre.isEmpty()) {
-            bookToUpdate.setGenre(newGenre);
-        }
-
-        System.out.print("Enter new Price (enter -1 to keep current): ");
-        double newPrice = scanner.nextDouble();
-        scanner.nextLine();
-        if (newPrice != -1) {
-            bookToUpdate.setPrice(newPrice);
-        }
-
-        System.out.print("Enter new Quantity (enter -1 to keep current): ");
-        int newQuantity = scanner.nextInt();
-        scanner.nextLine();
-        if (newQuantity != -1) {
-            bookToUpdate.setQuantity(newQuantity);
-        }
+        updateField(bookToUpdate::setTitle, "Enter new Title (leave blank to keep current): ");
+        updateField(bookToUpdate::setAuthor, "Enter new Author (leave blank to keep current): ");
+        updateField(bookToUpdate::setGenre, "Enter new Genre (leave blank to keep current): ");
+        updateField(bookToUpdate::setPrice, "Enter new Price (enter -1 to keep current): ");
+        updateField(bookToUpdate::setQuantity, "Enter new Quantity (enter -1 to keep current): ");
 
         System.out.println("Book updated successfully.\n");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> void updateField(java.util.function.Consumer<T> setter, String prompt) {
+        System.out.print(prompt);
+        String input = scanner.nextLine();
+        if (!input.isBlank()) {
+            T value = (T) (input.matches("-?\\d+(\\.\\d+)?") ? Double.parseDouble(input) : input);
+            setter.accept(value);
+        }
     }
 
     private static void deleteBook() {
@@ -385,8 +306,7 @@ public class BookstoreManagementSystem {
         System.out.print("Enter payment method (Cash, Credit, Debit): ");
         String paymentMethod = scanner.nextLine();
 
-        Transaction transaction = new Transaction(bookToSell.getTitle(), quantityToSell, totalPrice, paymentMethod);
-        transactions.add(transaction);
+        transactions.add(new Transaction(bookToSell.getTitle(), quantityToSell, totalPrice, paymentMethod));
 
         System.out.println("Book sold successfully. Total Price: $" + totalPrice + "\n");
     }
@@ -394,13 +314,10 @@ public class BookstoreManagementSystem {
     private static void viewTransactionHistory() {
         if (transactions.isEmpty()) {
             System.out.println("No transactions available.\n");
-            return;
+        } else {
+            System.out.println("Transaction History:");
+            transactions.forEach(System.out::println);
+            System.out.println();
         }
-
-        System.out.println("Transaction History:");
-        for (Transaction transaction : transactions) {
-            System.out.println(transaction);
-        }
-        System.out.println();
     }
 }
