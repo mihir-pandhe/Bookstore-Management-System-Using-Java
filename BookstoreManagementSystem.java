@@ -33,6 +33,22 @@ class Book {
         return price;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
     @Override
     public String toString() {
         return "Title: " + title + ", Author: " + author + ", Genre: " + genre + ", Price: $" + price;
@@ -49,7 +65,8 @@ public class BookstoreManagementSystem {
             System.out.println("1. Add Book");
             System.out.println("2. View Books");
             System.out.println("3. Search Books");
-            System.out.println("4. Exit");
+            System.out.println("4. Update Book");
+            System.out.println("5. Exit");
             System.out.print("Select an option: ");
 
             int choice = scanner.nextInt();
@@ -66,6 +83,9 @@ public class BookstoreManagementSystem {
                     searchBooks();
                     break;
                 case 4:
+                    updateBook();
+                    break;
+                case 5:
                     System.out.println("Exiting the system.");
                     System.exit(0);
                     break;
@@ -222,5 +242,47 @@ public class BookstoreManagementSystem {
             }
             System.out.println();
         }
+    }
+
+    private static void updateBook() {
+        System.out.print("Enter the title of the book to update: ");
+        String title = scanner.nextLine();
+
+        Book bookToUpdate = books.stream()
+                .filter(book -> book.getTitle().equalsIgnoreCase(title))
+                .findFirst()
+                .orElse(null);
+
+        if (bookToUpdate == null) {
+            System.out.println("Book not found.\n");
+            return;
+        }
+
+        System.out.print("Enter new Title (leave blank to keep current): ");
+        String newTitle = scanner.nextLine();
+        if (!newTitle.isEmpty()) {
+            bookToUpdate.setTitle(newTitle);
+        }
+
+        System.out.print("Enter new Author (leave blank to keep current): ");
+        String newAuthor = scanner.nextLine();
+        if (!newAuthor.isEmpty()) {
+            bookToUpdate.setAuthor(newAuthor);
+        }
+
+        System.out.print("Enter new Genre (leave blank to keep current): ");
+        String newGenre = scanner.nextLine();
+        if (!newGenre.isEmpty()) {
+            bookToUpdate.setGenre(newGenre);
+        }
+
+        System.out.print("Enter new Price (enter -1 to keep current): ");
+        double newPrice = scanner.nextDouble();
+        scanner.nextLine();
+        if (newPrice != -1) {
+            bookToUpdate.setPrice(newPrice);
+        }
+
+        System.out.println("Book updated successfully.\n");
     }
 }
